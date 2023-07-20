@@ -1,0 +1,78 @@
+************************ Adding custom PF-status**********************
+Using CL_SALV_TABLE
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_ADDINGCUSTOMPF
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zsumer_addingcustompf.
+
+DATA : it_makt TYPE STANDARD TABLE OF makt.
+
+DATA v_matnr TYPE matnr.
+
+
+
+*DATA o_alv TYPE REF TO CL_SALV_TABLE.
+*DATA o_alv1 TYPE REF TO CL_SALV_TABLE.
+SELECT-OPTIONS s_matnr FOR v_matnr.
+
+START-OF-SELECTION.
+  PERFORM get_data.
+
+END-OF-SELECTION.
+  PERFORM display.
+*&---------------------------------------------------------------------*
+*& Form get_data
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM get_data .
+
+  SELECT * FROM makt INTO TABLE it_makt WHERE matnr IN s_matnr.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form display
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+
+
+
+
+
+FORM display .
+       cl_salv_table=>factory(
+
+* EXPORTING
+*    list_display   = if_salv_c_bool_sap=>false " ALV Displayed in List Mode
+*    r_container    =                           " Abstract Container for GUI Controls
+*    container_name =
+        IMPORTING
+         r_salv_table   =   DATA(o_alv)                      " Basis Class Simple ALV Tables
+        CHANGING
+          t_table        = it_makt
+
+      ).
+
+
+      o_alv->set_screen_status(
+            pfstatus      =  'Zsumer_alv_status'
+            report        =  'Zsumer_alv_status'
+            set_functions = o_alv->c_functions_all
+             ).
+
+      O_alv->display().
+
+
+
+
+ENDFORM.

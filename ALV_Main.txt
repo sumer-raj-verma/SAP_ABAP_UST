@@ -1,0 +1,79 @@
+************************************ALV calling*******************************
+
+*&---------------------------------------------------------------------*
+*& Report ZTEST_OO_ALV_MAIN
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZTEST_OO_ALV_MAIN.
+CLASS lcl_report DEFINITION.
+*
+  PUBLIC SECTION.
+*
+*   Final output table
+    TYPES: BEGIN OF ty_vbak,
+           vbeln TYPE vbak-vbeln,
+           erdat TYPE erdat,
+           auart TYPE auart,
+           kunnr TYPE kunnr,
+           END   OF ty_vbak.
+*
+    DATA: t_vbak TYPE STANDARD TABLE OF ty_vbak.
+*
+*   ALV reference
+    DATA: o_alv TYPE REF TO cl_salv_table.
+*
+    METHODS:
+*     data selection
+      get_data,
+*
+*     Generating output
+      generate_output.
+    ENDCLASS.                    "lcl_report DEFINITION
+*
+*
+START-OF-SELECTION.
+  DATA: lo_report TYPE REF TO lcl_report.
+*
+  CREATE OBJECT lo_report.
+*
+  lo_report->get_data( ).
+*
+  lo_report->generate_output( ).
+*
+*----------------------------------------------------------------------*
+*       CLASS lcl_report IMPLEMENTATION
+*----------------------------------------------------------------------*
+CLASS lcl_report IMPLEMENTATION.
+*
+  METHOD get_data.
+*   data selection
+    SELECT vbeln erdat auart kunnr
+           INTO  TABLE t_vbak
+           FROM  vbak
+      UP TO 20 ROWS.
+*
+  ENDMETHOD.                    "get_data
+*
+*.......................................................................
+  METHOD generate_output.
+* New ALV instance
+*   We are calling the static Factory method which will give back
+*   the ALV object reference.
+*
+* exception class
+    DATA: lx_msg TYPE REF TO cx_salv_msg.
+    TRY.
+        cl_salv_table=>factory(
+          IMPORTING
+            r_salv_table = o_alv
+          CHANGING
+            t_table      = t_vbak ).
+      CATCH cx_salv_msg INTO lx_msg.
+    ENDTRY.
+
+    o_alv->display( ).
+*
+  ENDMETHOD.                    "generate_output
+
+ENDCLASS.

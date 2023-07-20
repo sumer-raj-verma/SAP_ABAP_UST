@@ -1,0 +1,60 @@
+***********************************Zust_Invoice****************************
+
+
+*&---------------------------------------------------------------------*
+*& Report ZUST_INVOICE_DATA
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZUST_INVOICE_DATA.
+
+PARAMETERS doc_Num TYPE ZSUMER_VBRK-VBELN.
+
+TYPES : BEGIN OF ty_vbrk,
+        VBELN TYPE ZSUMER_VBRK-VBELN,
+        FKDAT TYPE ZSUMER_VBRK-FKDAT,
+        KUNRG TYPE ZSUMER_VBRK-KUNRG,
+        NETWR TYPE ZSUMER_VBRK-NETWR,
+        END OF ty_vbrk.
+
+
+TYPES : BEGIN OF ty_vbrp,
+        VBELN TYPE ZSUMER_VBRP-VBELN,
+        POSNR TYPE ZSUMER_VBRP-POSNR,
+        MATNR TYPE ZSUMER_VBRP-MATNR,
+        FKIMG TYPE ZSUMER_VBRP-FKIMG,
+        NETWR TYPE ZSUMER_VBRP-NETWR,
+        END OF ty_vbrp.
+
+DATA st_vbrk TYPE ty_vbrk.
+DATA st_vbrp TYPE ty_vbrp.
+DATA v_name1 TYPE kna1-name1.
+DATA v_macht TYPE t006a-mseht.
+
+
+
+select SINGLE VBELN FKDAT KUNRG NETWR from ZSUMER_VBRK into st_vbrk where VBELN eq doc_Num.
+SELECT SINGLE name1 from kna1 INTO v_name1 where kunnr eq st_vbrk-KUNRG.
+
+
+  WRITE :/'output -> ' ,
+         /'Doc Number :' , st_vbrk-VBELN ,
+         /'doc date :' ,      st_vbrk-FKDAT ,
+         /'payer :' ,   v_name1 ,"printing the name
+         /'Net worth :' ,  st_vbrk-NETWR .
+
+
+
+select  MATNR FKIMG NETWR from ZSUMER_VBRP into st_vbrp where VBELN eq doc_Num.
+  WRITE : "/'posnr',"
+         40  'material',
+          80  'fkimg',
+          120  'net value'.
+
+
+  WRITE :"/ st_vbrp-POSNR,"
+         40 st_vbrp-MATNR,
+         80 st_vbrp-FKIMG,
+         120 st_vbrp-NETWR.
+ENDSELECT.
+*

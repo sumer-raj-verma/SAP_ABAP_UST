@@ -1,0 +1,81 @@
+*******************Billing Doc prep. using procedure************************
+
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_BILLINGDOC_PROCEDURE
+*&---------------------------------------------------------------------*
+*&we have to prepare the billing document using stores procedures.
+*&---------------------------------------------------------------------*
+REPORT zsumer_billingdoc_procedure NO STANDARD PAGE HEADING LINE-COUNT 9(1).
+
+
+
+
+DATA :it_vbrk TYPE STANDARD TABLE OF Zsumer_vbrk,
+      wa_vbrk LIKE LINE OF it_vbrk,
+      it_vbrp TYPE STANDARD TABLE OF Zsumer_vbrp,
+      wa_vbrp LIKE LINE OF it_vbrp.
+
+
+TYPES : BEGIN OF ty_t006a,
+          msehi TYPE t006a-msehi,
+          mseht TYPE t006a-mseht,
+        END OF ty_t006a.
+
+TYPES : BEGIN OF ty_kna1,
+          kunnr TYPE kna1-kunnr,
+          name1 TYPE kna1-name1,
+        END OF ty_kna1.
+
+DATA : it_t006a TYPE TABLE OF ty_t006a,
+       wa_t006a LIKE LINE OF it_t006a,
+       it_kna1  TYPE TABLE OF kna1,
+       wa_kna1  LIKE LINE OF it_kna1.
+
+SELECT-OPTIONS s_vebln FOR wa_vbrk-vbeln.
+
+START-OF-SELECTION.
+
+  SELECT * FROM Zsumer_vbrk INTO TABLE it_vbrk WHERE vbeln IN s_vebln .
+  SELECT * FROM Zsumer_vbrp INTO TABLE it_vbrp WHERE vbeln IN s_vebln.
+
+  SELECT kunnr name1 FROM kna1 INTO TABLE it_kna1 FOR ALL ENTRIES IN it_vbrk WHERE kunnr EQ it_vbrk-kunrg.
+  SELECT msehi mseht FROM t006a INTO TABLE it_t006a FOR ALL ENTRIES IN it_vbrp WHERE msehi EQ it_vbrp-vrkme.
+
+END-OF-SELECTION.
+
+
+  LOOP AT it_vbrp INTO wa_vbrp.
+    AT NEW vbeln.
+      READ TABLE it_vbrk INTO  wa_vbrk WITH  KEY vbeln = wa_vbrp-vbeln.
+      READ TABLE it_kna1 INTO wa_kna1 WITH KEY kunnr = wa_vbrk-kunrg.
+
+      WRITE : / 'document Number', wa_vbrk-vbeln,
+             / ' Billing date', wa_vbrk-fkdat,
+            / 'Payer ID', wa_vbrk-kunrg,
+            / ' Payers name', wa_kna1-name1,
+            / 'Net value', wa_vbrk-netwr.
+
+
+
+      SKIP.
+      WRITE : / 'Item',
+               'Material',
+               'Quantity',
+               'UoM',
+               'Net Value'.
+
+
+    ENDAT.
+
+    READ TABLE it_t006a INTO wa_t006a WITH KEY msehi = wa_vbrp-vrkme.
+
+    WRITE :/ wa_vbrp-vbeln,
+           / wa_vbrp-posnr,
+           / wa_vbrp-fkimg,
+           / wa_vbrp-vrkme,
+           / wa_vbrp-netwr.
+
+
+
+  ENDLOOP.

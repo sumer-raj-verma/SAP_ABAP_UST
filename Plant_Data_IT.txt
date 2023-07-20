@@ -1,0 +1,54 @@
+***********************Plant data Internal table**********************
+
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_PLANTDATA_INTERNALTAB
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zsumer_plantdata_internaltab.
+"PARAMETERS p_werks TYPE mard-werks.
+DATA v_werks TYPE mard-werks.
+SELECT-OPTIONS p_werks for v_werks.
+
+
+TYPES : BEGIN OF ty_mkt ,
+          mkt_matnr TYPE mard-matnr,
+          werks     TYPE mard-werks,
+          lgort     TYPE mard-lgort,
+        END OF ty_mkt .
+TYPES : BEGIN OF ty_matnr ,
+          matnr TYPE makt-matnr,
+          maktx TYPE makt-maktx,
+        END OF ty_matnr .
+
+DATA : it_material TYPE TABLE OF ty_mkt,
+       wa_material LIKE LINE OF it_material.
+DATA : it_mat TYPE TABLE OF ty_matnr,
+       wa_mat LIKE LINE OF it_mat.
+
+DATA v_maktx TYPE makt-maktx .
+DATA plant_name TYPE t001w-name1 .
+
+
+SELECT matnr werks lgort from mard INTO TABLE it_material where werks in p_werks[].
+"SELECT * from mard INTO TABLE it_material where werks in p_werks[].
+
+SELECT SINGLE name1 FROM t001w INTO plant_name WHERE werks EQ p_werks .
+WRITE : /'MATERIAL' ,
+        25 'Description',
+        60 'PLANT' ,
+        90 'Name',
+        120 'LOCATION' .
+SELECT matnr werks lgort FROM  mard INTO TABLE it_material  WHERE werks EQ p_werks.
+ if it_material is not INITIAL.
+SELECT matnr maktx FROM makt INTO TABLE it_mat FOR ALL ENTRIES IN it_material WHERE matnr EQ it_material-mkt_matnr AND spras EQ sy-langu.
+ENDIF.
+LOOP AT it_material INTO wa_material  .
+  READ TABLE it_mat INTO wa_mat WITH KEY matnr = wa_material-mkt_matnr.
+  WRITE : / wa_material-mkt_matnr ,
+           25 wa_mat-maktx ,
+           60 wa_material-werks ,
+           90 plant_name ,
+           120 wa_material-lgort .
+ENDLOOP .

@@ -1,0 +1,84 @@
+************************************Internal Table*****************************
+
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_INTERNAL_TABLE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSUMER_INTERNAL_TABLE.
+
+TYPES : BEGIN OF ty_makt,
+        matnr TYPE makt,
+        spras TYPE spras,
+        maktx TYPE maktx,
+        END OF ty_makt.
+
+
+DATA : it_makt type table of ty_makt,
+       wa_makt like LINE OF it_makt.
+
+
+
+*SELECT matnr spras maktx FROM makt INTO TABLE it_makt.
+*  LOOP AT it_makt INTO wa_makt.
+*      WRITE : / wa_makt-matnr, wa_makt-spras, wa_makt-maktx.
+*  ENDLOOP.
+*
+*  SELECT matnr spras maktx FROM makt INTO wa_makt.
+*    WRITE : / wa_makt-matnr, wa_makt-spras, wa_makt-maktx.
+*  ENDSELECT.
+
+wa_makt-matnr = '100'.
+wa_makt-spras = 'E'.
+wa_makt-maktx = 'Pen'.
+APPEND wa_makt TO it_makt.
+
+wa_makt-matnr = '200'.
+wa_makt-spras = 'E'.
+wa_makt-maktx = 'Pencil'.
+APPEND wa_makt TO it_makt.
+
+wa_makt-matnr = '200'.
+wa_makt-spras = 'D'.
+wa_makt-maktx = 'Pencilz german'.
+APPEND wa_makt TO it_makt.
+
+wa_makt-matnr = '300'.
+wa_makt-spras = 'E'.
+wa_makt-maktx = 'Book'.
+APPEND wa_makt TO it_makt.
+
+wa_makt-matnr = '500'.
+wa_makt-spras = 'D'.
+wa_makt-maktx = 'Penc'.
+APPEND wa_makt TO it_makt.
+
+
+READ TABLE it_makt into wa_makt INDEX 3.
+
+*write : / wa_makt-matnr,
+*        40 wa_makt-spras,
+*        60  wa_makt-maktx.
+
+READ TABLE it_makt INTO wa_makt INDEX 2.
+*write : / wa_makt-matnr,
+*        40 wa_makt-spras,
+*        60  wa_makt-maktx.
+
+READ TABLE it_makt INTO wa_makt WITH KEY matnr = '200' spras = 'D'.
+
+write : / 'Material Number',
+          40 'Language',
+          60 'Material description'.
+
+LOOP AT it_makt INTO wa_makt WHERE matnr eq '200'.
+
+
+
+  write : / wa_makt-matnr,
+        40 wa_makt-spras,
+        60  wa_makt-maktx.
+
+ENDLOOP.
+WRITE 'End'.

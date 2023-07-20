@@ -1,0 +1,26 @@
+************************Inheritance Demo**************************************
+
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_INHERITANCE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSUMER_INHERITANCE.
+
+data o_super type REF TO Zsumer_super.
+data o_sub type REF TO Zsumer_sub.
+
+
+create OBJECT o_super.
+CREATE OBJECT o_sub.
+
+o_super->next_number(
+IMPORTING
+  ex_num = data(num)
+  ).
+
+o_sub->next_number(
+IMPORTING
+  ex_num = DATA(num1)
+).

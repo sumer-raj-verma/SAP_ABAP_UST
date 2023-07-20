@@ -1,0 +1,25 @@
+***************Elementry Data Types******************************************
+
+
+
+*&---------------------------------------------------------------------*
+*& Report ZUST_DATA_TYPES_ELEMANTRY
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZUST_DATA_TYPES_ELEMANTRY.
+
+
+
+"TYPES emp_ust TYPE c LENGTH 20.
+
+
+DATA : emp_FirstName TYPE Zemp_ust,
+       emp_LastName TYPE Zemp_ust.
+
+
+       emp_FirstName = 'Sumer'.
+       emp_LastName = 'Verma'.
+
+
+WRITE : 'Employee full name is:',emp_firstname,emp_lastname.

@@ -1,0 +1,49 @@
+********************Billing doc practice***************************
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_BILLING_PRACTICE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zsumer_billing_practice.
+
+
+DATA : it_vbrk TYPE TABLE OF Zsumer_vbrk,
+       wa_vbrk LIKE LINE OF it_vbrk.
+
+DATA : it_vbrp TYPE TABLE OF Zsumer_vbrp,
+       wa_vbrp LIKE LINE OF it_vbrp.
+
+*DATA : it_kna1 TYPE  TABLE of kna1,
+*        wa_kna1 like LINE OF it_kna1.
+
+
+SELECT-OPTIONS  v_vebln FOR wa_vbrk-vbeln.
+
+SELECT * FROM Zsumer_vbrp INTO TABLE  it_vbrp WHERE vbeln IN v_vebln[].
+SELECT * FROM Zsumer_vbrk INTO TABLE it_vbrk WHERE vbeln IN v_vebln.
+
+
+"SORT  it_vbrp by vbeln posnr.
+LOOP AT it_vbrp INTO wa_vbrp .
+  READ TABLE it_vbrk INTO wa_vbrk WITH KEY vbeln = wa_vbrp-vbeln.
+
+  "AT NEW vbeln.
+    WRITE : / 'doc number' , wa_vbrk-vbeln,
+            30 'date',  wa_vbrk-fkdat,
+            60 'payer',wa_vbrk-kunrg,
+            90 'net value',wa_vbrk-netwr .
+
+    WRITE : / 'Item',
+             30'Material',
+             45'Quantity',
+             60'UoM',
+             90'Net Value'.
+  "ENDAT.
+
+  WRITE : / wa_vbrp-posnr,
+          30  wa_vbrp-matnr,
+          45  wa_vbrp-fkimg,
+          60 wa_vbrp-vrkme,
+          90 wa_vbrp-netwr.
+Clear: wa_vbrp,wa_vbrk.
+ENDLOOP.

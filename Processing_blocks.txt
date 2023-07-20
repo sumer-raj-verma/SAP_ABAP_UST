@@ -1,0 +1,82 @@
+***********************************Processing Blocks******************************
+
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_PROCESSING_BLOCKS
+*&---------------------------------------------------------------------*
+*&Print billing documents using processing blocks and events.
+*&---------------------------------------------------------------------*
+REPORT ZSUMER_PROCESSING_BLOCKS NO STANDARD PAGE HEADING LINE-COUNT 9(1).
+
+
+
+" Data Objects
+DATA : it_vbrk TYPE TABLE OF ZSUMER_VBRk,
+       wa_vbrk LIKE LINE OF it_vbrk.
+DATA : it_vbrp TYPE TABLE OF ZSUMER_vbrp,
+       wa_vbrp LIKE LINE OF it_vbrp.
+
+" Provide selection screen for user Input
+SELECT-OPTIONS s_vbeln FOR wa_vbrk-vbeln.
+START-OF-SELECTION.
+" Data Selection
+SELECT * FROM ZSUMER_VBRk INTO TABLE it_vbrk WHERE vbeln IN s_vbeln.
+SELECT * FROM ZSUMER_VBRP INTO TABLE it_vbrp WHERE vbeln IN s_vbeln.
+
+END-OF-SELECTION.
+" Output the data
+SET PF-STATUS 'LIST'.
+SORT it_vbrp BY vbeln.
+LOOP AT it_vbrp INTO wa_vbrp.
+
+  READ TABLE it_vbrk INTO wa_vbrk WITH KEY vbeln = wa_vbrp-vbeln.
+
+  "AT NEW vbeln.
+
+    WRITE : / 'Doc No:', wa_vbrk-vbeln,
+           / 'Payer:', wa_vbrk-kunrg,
+           / 'Date:', wa_vbrk-fkdat,
+           / 'Net Value:', wa_vbrk-netwr.
+    SKIP.
+
+    WRITE : / 'Item',
+            25 'Material',
+            40 'Quantity',
+            80 'UoM',
+            100 'Net Value' LEFT-JUSTIFIED.
+  "ENDAT.
+  WRITE : / wa_vbrp-posnr,
+          25  wa_vbrp-matnr,
+          40  wa_vbrp-fkimg,
+          80  wa_vbrp-vrkme,
+          100  wa_vbrp-netwr LEFT-JUSTIFIED.
+  AT END OF vbeln.
+ "   SUM.
+ "   WRITE : / wa_vbrp-fkimg, wa_vbrp-netwr.
+*    WRITE : / '***************************************END of Document****************************************************'.
+ "   SKIP.
+  ENDAT.
+ENDLOOP.
+TOP-OF-PAGE.
+WRITE 'UST Global'.
+
+END-OF-PAGE.
+WRITE : / 'This is electronic statement'.
+
+
+
+AT LINE-SELECTION.
+  WRITE : / 'This is secondary list', sy-lsind.
+
+
+*AT USER-COMMAND.
+*  CASE sy-ucomm.
+*    WHEN 'PDF'.
+*    WHEN 'EXCEL'.
+*    WHEN OTHERS.
+*  ENDCASE.
+
+
+
+"ULINE is used to print horizantal line.
+"VLINE is used to print vertical line.

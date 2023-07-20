@@ -1,0 +1,71 @@
+******************Billing Document using Internal Table *************************
+
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_INTERNAL_TABLE_BILLING
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSUMER_INTERNAL_TABLE_BILLING.
+
+PARAMETERS p_docNo TYPE zsumer_vbrk-vbeln.
+
+TYPES: BEGIN OF ty_vbrk,
+  vbeln TYPE zsumer_vbrk-vbeln,
+  kunrg TYPE zsumer_vbrk-kunrg,
+  fkdat TYPE zsumer_vbrk-fkdat,
+  netwr TYPE zsumer_vbrk-netwr,
+  END OF ty_vbrk.
+
+
+TYPES: BEGIN OF ty_vbrp,
+  posnr TYPE zsumer_vbrp-posnr,
+  matnr TYPE zsumer_vbrp-matnr,
+  fkimg TYPE zsumer_vbrp-fkimg,
+  vrkme TYPE zsumer_vbrp-vrkme,
+  netwr TYPE zsumer_vbrp-netwr,
+  END OF ty_vbrp.
+
+  DATA : it_vbrk TYPE TABLE of ty_vbrk,
+         wa_vbrk like line of it_vbrk.
+
+  DATA : it_vbrp TYPE TABLE of ty_vbrp,
+         wa_vbrp LIKE LINE OF it_vbrp.
+
+
+  DATA v_name TYPE KNA1-NAMe1.
+  DATA v_mseht Type t006a-mseht.
+
+
+
+  WRITE:'Document No:'.
+   WRITE:'Payer:'.
+   WRITE:'Date:'.
+  WRITE: 'NetWorth:'.
+
+ SELECT SINGLE vbeln kunrg fkdat netwr from zsumer_vbrk into st_vbrk where vbeln EQ p_docNo.
+ SELECT SINGLE name1  from kna1 into v_name WHERE kunnr EQ st_vbrk-kunrg.
+
+READ TABLE vbeln kunrg fkadt netwr from zsumer_vbrk.
+
+   WRITE:'Document No:',st_vbrk-vbeln.
+   WRITE:/'Payer_NAMe:',v_name.
+   WRITE:/'Date:',st_vbrk-fkdat.
+   WRITE:/'NetWorth:',st_vbrk-netwr.
+
+
+ 
+
+
+       WRITE:/'ITEM',
+  20 'MATERIAL',
+ 40 'QTY',
+ 60 'UOM',
+ 80 'NETVALUE'.
+*select posnr matnr fkimg vrkme netwr from zsumer_vbrp into st_vbrp where vbeln EQ p_docNo.
+
+         SELECT posnr matnr fkimg vrkme netwr from zsumer_vbrp into TABLE it_vbrp WHERE vbeln eq p_docNo.
+         LOOP AT it_vbrp INTO wa_vbrp.
+         WRITE :/ wa_vbrp-posnr,wa_vbrp-matnr,wa_vbrp-fkimg,wa_vbrp-vrkme,wa_vbrp-netwr.
+         ENDLOOP.
+

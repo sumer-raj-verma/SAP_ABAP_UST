@@ -1,0 +1,34 @@
+*******************************Procedure Demo***********************
+
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_PROCEDURE_DEMO
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSUMER_PROCEDURE_DEMO.
+
+DATA : v_matnr TYPE matnr,
+       v_spras TYPE spras,
+       v_maktx TYPE maktx.
+
+v_matnr = '100'.
+v_spras = 'e'.
+
+PERFORM get_maktx USING v_matnr v_spras CHANGING v_maktx.
+write v_maktx.
+
+
+Form get_maktx using p_v_matnr type matnr
+                     value(p_v_spras) TYPE spras
+                     CHANGING VALUE(p_v_maktx) TYPE maktx.
+  SELECT SINGLE maktx from makt into p_v_maktx WHERE matnr eq v_matnr and spras eq v_spras.
+
+
+endform.
+
+*FORM get_maktx USING   p_v_matnr TYPE matnr
+*                    VALUE(p_v_spras) TYPE spras
+*               CHANGING VALUE(p_v_maktx) TYPE maktx.
+*select single maktx from makt into p_v_maktx WHERE matnr eq v_matnr and spras eq v_spras.
+*ENDFORM.

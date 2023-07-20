@@ -1,0 +1,12 @@
+FUNCTION-POOL ZSRV_FG_A2.                   "MESSAGE-ID ..
+
+* INCLUDE LZSRV_FG_A2D...
+
+                  " Local class definition
+
+
+
+
+
+DATA : lt_kna1 TYPE STANDARD TABLE OF ZSUMER_CUSTOMER,
+       lw_kna1 LIKE LINE OF lt_kna1.

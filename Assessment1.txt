@@ -1,0 +1,26 @@
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_ASSESMENT2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSUMER_ASSESMENT2.
+
+DATA v_kunnr TYPE kna1-kunnr.
+SELECT-OPTIONS p_kunnr FOR v_kunnr.
+
+DATA: it_kna1 TYPE TABLE of ZSUMER_CUSTOMER,
+      wa_kna1 LIKE LINE OF it_kna1.
+
+CALL FUNCTION 'CUSTOMER_DATA'
+  EXPORTING
+    im_kunnr       = p_kunnr[]
+ IMPORTING
+   EX_ITEM        = it_kna1
+          .
+Loop at it_kna1 INTO wa_kna1.
+  WRITE : / wa_kna1-KUNNR,
+             wa_kna1-name1,
+             "wa_kna1-name2,
+             wa_kna1-land1,
+             wa_kna1-regio.
+   ENDLOOP.

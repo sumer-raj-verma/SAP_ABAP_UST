@@ -1,0 +1,87 @@
+*******************************select-Option Billing doc.************************************
+
+
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_BILLING_SELECT_OPTION
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zsumer_billing_select_option.
+
+DATA v_vbeln TYPE zsumer_vbrk-vbeln.
+SELECT-OPTIONS p_docNo FOR v_vbeln.
+
+
+
+TYPES : BEGIN OF ty_vbrk,
+          vbeln TYPE zsumer_vbrk-vbeln,
+          fkdat TYPE zsumer_vbrk-fkdat,
+          kunrg TYPE zsumer_vbrk-kunrg,
+          netwr TYPE zsumer_vbrk-netwr,
+        END OF ty_vbrk.
+
+TYPES : BEGIN OF ty_vbrp,
+          posnr TYPE zsumer_vbrp-posnr,
+          matnr TYPE zsumer_vbrp-matnr,
+          fkimg TYPE zsumer_vbrp-fkimg,
+          vrkme TYPE zsumer_vbrp-vrkme,
+          netwr TYPE zsumer_vbrp-netwr,
+        END OF ty_vbrp.
+
+TYPES : BEGIN OF ty_t006a,
+          msehi TYPE t006a-msehi,
+          mseht TYPE t006a-mseht,
+        END OF ty_t006a.
+
+TYPES : BEGIN OF ty_kna1,
+          name1 TYPE kna1-name1,
+          kunnr TYPE kna1-kunnr,
+        END OF ty_kna1.
+
+
+DATA : it_zsumer_vbrk TYPE TABLE OF zsumer_vbrk,
+       wa_zsumer_vbrk LIKE  LINE OF it_zsumer_vbrk,
+       it_zsumer_vbrp TYPE TABLE OF zsumer_vbrp,
+       wa_zsumer_vbrp LIKE LINE OF it_zsumer_vbrp,
+       it_t006a       TYPE TABLE OF ty_t006a,
+       wa_t006a       LIKE LINE OF it_t006a,
+       it_kna1        TYPE TABLE OF ty_kna1,
+       wa_kna1        LIKE LINE OF it_kna1.
+
+SELECT * FROM zsumer_vbrk INTO TABLE it_zsumer_vbrk WHERE vbeln IN p_docNo[].
+
+SELECT * FROM zsumer_vbrp  INTO TABLE it_zsumer_vbrp WHERE vbeln IN p_docNo[].
+
+
+SELECT  name1 kunnr FROM kna1 INTO TABLE it_kna1 FOR ALL ENTRIES IN it_zsumer_vbrk  WHERE kunnr EQ it_zsumer_vbrk-kunrg.
+
+SELECT msehi mseht FROM t006a INTO TABLE it_t006a FOR ALL ENTRIES IN it_zsumer_vbrp WHERE spras EQ sy-langu AND msehi EQ it_zsumer_vbrp-vrkme.
+SORT it_zsumer_vbrp BY vbeln.
+DATA v_vbeln_temp LIKE wa_zsumer_vbrp.
+
+LOOP AT it_zsumer_vbrp INTO wa_zsumer_vbrp.
+  READ TABLE it_zsumer_vbrk INTO wa_zsumer_vbrk WITH KEY vbeln = wa_zsumer_vbrp-vbeln.
+  READ TABLE it_kna1 INTO wa_kna1 WITH KEY kunnr = wa_zsumer_vbrk-kunrg.
+  IF wa_zsumer_vbrp NE v_vbeln_temp.
+
+
+    WRITE : /'DOCUMENT NO :', wa_zsumer_vbrk-vbeln,
+            / 'Payer :', wa_kna1-name1,
+                /'Date :', wa_zsumer_vbrk-fkdat,
+               /'Net Value :', wa_zsumer_vbrk-netwr LEFT-JUSTIFIED.
+
+    WRITE : /'ITEM' ,
+  30 'MATERIAL',
+  60 'QTY',
+  "90 'UOM'
+  120 'NET VALUE' .
+  ENDIF.
+  WRITE : /  wa_zsumer_vbrp-posnr ,
+    30  wa_zsumer_vbrp-matnr,
+    60  wa_zsumer_vbrp-fkimg LEFT-JUSTIFIED,
+    "90  wa_t006a-msehi
+    120 wa_zsumer_vbrp-netwr LEFT-JUSTIFIED.
+
+  v_vbeln_temp = wa_zsumer_vbrp-vbeln.
+ENDLOOP .

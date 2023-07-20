@@ -1,0 +1,58 @@
+***********************************class Demo **********************
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_CLASS_DEMO
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSUMER_CLASS_DEMO.
+
+"To define a class. This is a local class.
+CLASS l_counter DEFINITION.
+  PUBLIC SECTION.
+  "declare data object.
+  DATA count type i.
+ " METHOD decleration
+  METHODS next_number EXPORTING number TYPE i.
+
+  PROTECTED SECTION.
+
+  PRIVATE SECTION.
+
+  ENDCLASS.
+
+
+  "using method.
+  CLASS l_counter IMPLEMENTATION.
+    METHOD next_number .
+      count = count + 1.
+      count = number.
+      ENDMETHOD.
+    ENDCLASS.
+
+   " Data object referring to a class.
+      DATA o_doc TYPE REF TO l_counter.
+      DATA o_tag TYPE REF TO l_counter.
+
+      DATA v_doc TYPE i.
+DATA v_tag TYPE i.
+
+
+      START-OF-SELECTION.
+      "Object creation.
+      create OBJECT o_doc.
+      create OBJECT o_tag.
+
+      o_doc->next_number(
+      IMPORTING
+        number = v_doc
+      ) .
+
+      o_tag->next_number(
+
+      importing
+        number = v_tag
+
+      ).
+
+      end-of-SELECTION.

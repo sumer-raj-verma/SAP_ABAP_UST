@@ -1,0 +1,73 @@
+*****************************Plant Data***********************************
+
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_PLANTDATA_COLOR
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSUMER_PLANTDATA_COLOR.
+
+
+DATA p_werks type mard-werks .
+
+SELECT-OPTIONS s_werks for p_werks .
+
+TYPES : BEGIN OF ty_mkt ,
+      mkt_matnr type mard-matnr ,
+      werks type mard-werks ,
+      lgort type mard-lgort ,
+      END OF ty_mkt .
+TYPES : BEGIN OF ty_matnr ,
+      matnr type makt-matnr ,
+      maktx type makt-maktx ,
+      END OF ty_matnr .
+TYPES : BEGIN  OF ty_plantname,
+        werks type t001w-werks,
+        name1 type t001w-name1,
+      END OF ty_plantname.
+
+DATA v_maktx type makt-maktx .
+
+DATA : it_material TYPE TABLE OF ty_mkt,
+       wa_material LIKE LINE OF it_material,
+       it_mat TYPE TABLE OF ty_matnr,
+       wa_mat LIKE LINE OF it_mat,
+       it_plant TYPE TABLE OF ty_plantname ,
+       wa_plant LIKE LINE OF it_plant ,
+       it_matnr TYPE TABLE OF c,
+       wa_matnr like line of it_matnr .
+
+
+  WRITE : /'MATERIAL' ,
+         25 'Description',
+         60 'PLANT' ,
+         90 'Name',
+         120 'LOCATION' .
+SELECT matnr werks lgort from  mard into TABLE it_material  where werks in s_werks[].
+  IF it_material is not INITIAL .
+  SELECT matnr maktx from makt into TABLE it_mat FOR ALL ENTRIES IN it_material where matnr eq it_material-mkt_matnr and spras eq sy-langu.
+  select werks name1 from t001w into TABLE it_plant FOR ALL ENTRIES IN it_material where werks eq it_material-werks .
+
+   ENDIF .
+
+LOOP AT it_material INTO wa_material  .
+  READ TABLE it_mat INTO wa_mat WITH KEY matnr = wa_material-mkt_matnr.
+  READ TABLE it_plant into wa_plant with key werks = wa_material-werks.
+  IF wa_material-mkt_matnr CS 'ATV112SLED' OR wa_material-mkt_matnr CS 'NTV22SLED' OR wa_material-mkt_matnr CS 'ATV92SLED'  .
+  FORMAT COLOR COL_NEGATIVE.
+   WRITE : / wa_material-mkt_matnr ,
+            25 wa_mat-maktx ,
+            60 wa_material-werks ,
+            90 wa_plant-name1 ,
+            120 wa_material-lgort .
+   FORMAT COLOR OFF.
+
+   ELSE .
+      WRITE : / wa_material-mkt_matnr ,
+            25 wa_mat-maktx ,
+            60 wa_material-werks ,
+            90 wa_plant-name1 ,
+            120 wa_material-lgort .
+      ENDIF .
+ ENDLOOP .

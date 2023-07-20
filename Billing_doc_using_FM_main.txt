@@ -1,0 +1,104 @@
+***********************Billing doc using Function Module**************************
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_BILLING_FMODULE_MAIN
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSUMER_BILLING_FMODULE_MAIN.
+
+
+
+
+
+DATA: it_header TYPE Zsumer_t_header,
+      wa_header LIKE LINE OF it_header.
+
+DATA: it_item TYPE Zsumer_t_item,
+      wa_item LIKE LINE OF it_item.
+
+DATA p_vbeln TYPE Zsumer_vbrk-vbeln.
+
+START-OF-SELECTION.
+SELECT-OPTIONS s_vbeln FOR p_vbeln.
+end-of-SELECTION.
+
+
+PERFORM get_data.
+PERFORM show_output.
+
+
+
+
+
+  "READ TABLE it_t006a INTO wa_t006a WITH KEY msehi = wa_vbrp-vrkme.
+*&---------------------------------------------------------------------*
+*& Form get_data
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM get_data .
+
+  CALL FUNCTION 'ZJANA_FM'."'ZSUMER_BILLING_FMODULE'
+  EXPORT
+    im_vbeln  = s_vbeln[]
+
+    IMPORT =
+    ex_header = it_header
+    ex_item   = it_item.
+
+ENDFORM.
+
+
+
+
+*FORM get_data.
+*
+*
+*  CALL FUNCTION 'ZSUMER_BILLING_FMODULE'.
+*  endform.
+
+
+
+*&---------------------------------------------------------------------*
+*& Form show_output
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM show_output .
+
+  CALL FUNCTION 'ZSUMER_BILLING_FMODULE'.
+
+  SORT it_item BY vbeln.
+
+loop At it_item INTO wa_item.
+AT new vbeln.
+  READ TABLE it_header INTO wa_header WITH KEY vbeln = wa_item-vbeln.
+    WRITE : / 'Doc No:', wa_header-vbeln,
+           / 'Payer:', wa_header-name1,
+           / 'Date:', wa_header-fkdat,
+           / 'Net Value:', wa_header-netwr.
+    SKIP.
+
+
+
+    WRITE : /5  'Item',
+             20 'Material',
+             50 'Quantity',
+             60 'UoM',
+              90 'Net Value'.
+
+    endat.
+      WRITE : /5 wa_item-posnr,
+            20 wa_item-matnr,
+            40 wa_item-fkimg,
+            60 wa_item-mseht,
+            80 wa_item-netwr.
+ENDLOOP.
+
+ENDFORM.

@@ -1,0 +1,65 @@
+****************************************Invoice practice***************************
+
+
+
+
+*&---------------------------------------------------------------------*
+*& Report ZUST_INVOICE_DATA_ASSIGN02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZUST_INVOICE_DATA_ASSIGN02.
+
+PARAMETERS p_docNo TYPE zsumer_vbrk-vbeln.
+
+TYPES: BEGIN OF ty_vbrk,
+  vbeln TYPE zsumer_vbrk-vbeln,
+  kunrg TYPE zsumer_vbrk-kunrg,
+  fkdat TYPE zsumer_vbrk-fkdat,
+ netwr TYPE zsumer_vbrk-netwr,
+  END OF ty_vbrk.
+
+
+TYPES: BEGIN OF ty_vbrp,
+  posnr TYPE zsumer_vbrp-posnr,
+  matnr TYPE zsumer_vbrp-matnr,
+  fkimg TYPE zsumer_vbrp-fkimg,
+  vrkme TYPE zsumer_vbrp-vrkme,
+  netwr TYPE zsumer_vbrp-netwr,
+  END OF ty_vbrp.
+
+  Data st_vbrk TYPE ty_vbrk.
+data st_vbrp TYPE ty_vbrp.
+data v_name TYPE KNA1-NAMe1.
+data v_mseht Type t006a-mseht.
+
+
+*  WRITE:'Document No:'.
+*   WRITE:'Payer:'.
+*   WRITE:'Date:'.
+*  WRITE: 'NetWorth:'.
+
+ SELECT SINGLE vbeln kunrg fkdat netwr from zsumer_vbrk into st_vbrk where vbeln EQ p_docNo.
+SELECT SINGLE name1  from kna1 into v_name WHERE kunnr EQ st_vbrk-kunrg.
+
+   WRITE:'Document No:',st_vbrk-vbeln.
+   WRITE:/'Payer_NAMe:',v_name.
+   WRITE:/'Date:',st_vbrk-fkdat.
+   WRITE:/'NetWorth:',st_vbrk-netwr.
+
+
+
+
+       WRITE:/'ITEM',
+  20 'MATERIAL',
+ 40 'QTY',
+ 60 'UOM',
+ 80 'NETVALUE'.
+       select posnr matnr fkimg vrkme netwr from zsumer_vbrp into st_vbrp where vbeln EQ p_docNo.
+         Select SINGLE mseht from t006a into v_mseht where spras eq sy-langu and  msehi EQ st_vbrp-vrkme.
+         Write:/ st_vbrp-posnr,
+         20 st_vbrp-matnr,
+         40 st_vbrp-fkimg LEFT-JUSTIFIED,
+         60 v_mseht LEFT-JUSTIFIED,
+         80 st_vbrp-netwr LEFT-JUSTIFIED.
+         ENDSELECT.

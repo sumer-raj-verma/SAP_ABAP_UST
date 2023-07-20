@@ -1,0 +1,77 @@
+*****************************ALV************************************
+
+
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_ALV
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zsumer_alv.
+
+DATA : it_makt TYPE STANDARD TABLE OF makt.
+DATA :o1_alv TYPE REF TO cl_salv_sorts.
+
+DATA v_matnr TYPE matnr.
+
+DATA o_alv TYPE REF TO cl_salv_table.
+*DATA o_alv1 TYPE REF TO CL_SALV_TABLE.
+
+
+SELECT-OPTIONS s_matnr FOR v_matnr.
+
+START-OF-SELECTION.
+  PERFORM get_data.
+
+END-OF-SELECTION.
+  PERFORM display.
+*&---------------------------------------------------------------------*
+*& Form get_data
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM get_data .
+
+  SELECT * FROM makt INTO TABLE it_makt WHERE matnr IN s_matnr.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form display
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+
+
+
+
+
+FORM display .
+  cl_salv_table=>factory(
+
+    IMPORTING
+      r_salv_table   =    o_alv                       " Basis Class Simple ALV Tables
+    CHANGING
+      t_table        = it_makt
+  ).
+*CATCH cx_salv_msg. " ALV: General Error Class with Message
+
+  o_alv->set_screen_status(
+    report        = 'ZSUMER_ALV'
+    pfstatus      = 'SALV_TABLE_STANDARD'
+*  set_functions = cl_salv_model_base=>c_functions_none
+  ).
+
+ o1_alv = o_alv->get_sorts( ).
+CALL METHOD o1_alv->add_sort
+  EXPORTING
+    columnname = 'MATNR'.
+
+
+  o_alv->display( ).
+
+ENDFORM.

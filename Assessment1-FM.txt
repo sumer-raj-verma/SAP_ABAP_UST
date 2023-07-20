@@ -1,0 +1,23 @@
+FUNCTION CUSTOMER_DATA.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     REFERENCE(IM_KUNNR) TYPE  ZSUMER_T_RANGE
+*"  EXPORTING
+*"     REFERENCE(EX_ITEM) TYPE  ZSUMER_CUSTOMERTB
+*"----------------------------------------------------------------------
+
+
+
+data: lw_kna1 LIKE LINE OF EX_ITEM.
+
+
+
+select kunnr name1 name2 land1 regio from KNA1 into lw_kna1 WHERE kunnr in IM_KUNNR.
+  append lw_kna1 to ex_item.
+ENDSELECT.
+
+
+
+
+ENDFUNCTION.

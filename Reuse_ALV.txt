@@ -1,0 +1,165 @@
+**************************************Reuse ALV**********************************
+*&---------------------------------------------------------------------*
+*& Report ZSUMER_REUSE_ALV
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zsumer_reuse_alv.
+
+
+DATA : it_makt TYPE STANDARD TABLE OF makt,
+  lw_makt LIKE LINE OF it_makt.
+
+
+
+data: lt_sort TYPE TABLE Of slis_sortinfo_alv,
+      lw_sort like LINE OF lt_sort.
+
+DATA v_matnr TYPE matnr.
+
+SELECT-OPTIONS s_matnr FOR v_matnr.
+
+START-OF-SELECTION.
+  PERFORM get_data.
+
+END-OF-SELECTION.
+  PERFORM display.
+*&---------------------------------------------------------------------*
+*& Form get_data
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM get_data .
+
+
+  SELECT * FROM makt INTO TABLE it_makt WHERE matnr IN s_matnr.
+*  LOOP AT it_makt INTO lw_makt.
+*    CALL FUNCTION 'CONVERSION_EXIT_MATN1_OUTPUT'
+*      EXPORTING
+*        input         = lw_makt-matnr
+*     IMPORTING
+*       OUTPUT        = lw_makt-matnr
+*              .
+*    MODIFY it_makt FROM lw_makt INDEX sy-tabix.
+*  ENDLOOP.
+*
+*  SELECT * FROM mard INTO TABLE it_mard FOR ALL ENTRIES IN it_makt WHERE matnr EQ it_makt-matnr.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form display
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM display .
+
+  DATA : lt_fcat TYPE slis_t_fieldcat_alv,
+         lw_fcat LIKE LINE OF lt_fcat.
+
+  lw_fcat-col_pos = 1.
+  lw_fcat-fieldname = 'MATNR'.
+  lw_fcat-tabname = 'IT_MAKT'.
+  lw_fcat-seltext_m = 'Material Number'.
+  lw_fcat-outputlen = 20.
+  lw_fcat-edit_mask = '==MATN1'.
+  APPEND lw_fcat TO lt_fcat.
+
+  CLEAR lw_fcat.
+
+  lw_fcat-col_pos = 2.
+  lw_fcat-fieldname = 'SPRAS'.
+  lw_fcat-tabname = 'IT_MAKT'.
+  lw_fcat-seltext_m = 'Language'.
+  lw_fcat-outputlen = 15.
+  lw_fcat-edit_mask = '==ISOLA'.
+  APPEND lw_fcat TO lt_fcat.
+  CLEAR lw_fcat.
+
+  lw_fcat-col_pos = 3.
+  lw_fcat-fieldname = 'MAKTX'.
+  lw_fcat-tabname = 'IT_MAKT'.
+  lw_fcat-seltext_m = 'Material Description'.
+  lw_fcat-outputlen = 40.
+  APPEND lw_fcat TO lt_fcat.
+
+
+
+lw_sort-spos = '01' .
+lw_sort-fieldname = 'MATNR'.
+lw_sort-tabname = 'IT_FINAL'.
+lw_sort-up = 'X'.
+APPEND lw_sort to lt_sort.
+
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+    EXPORTING
+*     I_INTERFACE_CHECK        = ' '
+*     I_BYPASSING_BUFFER       = ' '
+*     I_BUFFER_ACTIVE          = ' '
+      i_callback_program       = 'ZSUMER_REUSE_ALV '
+      i_callback_pf_status_set = 'ZSUMER_PF_STATUS'
+      i_callback_user_command  = 'USER_COMMAND'
+*     I_CALLBACK_TOP_OF_PAGE   = ' '
+*     I_CALLBACK_HTML_TOP_OF_PAGE       = ' '
+*     I_CALLBACK_HTML_END_OF_LIST       = ' '
+*     I_STRUCTURE_NAME         =
+*     I_BACKGROUND_ID          = ' '
+*     I_GRID_TITLE             =
+*     I_GRID_SETTINGS          =
+*     IS_LAYOUT                =
+      it_fieldcat              = lt_fcat
+*     IT_EXCLUDING             =
+*     IT_SPECIAL_GROUPS        =
+     IT_SORT                  = lt_sort
+*     IT_FILTER                =
+*     IS_SEL_HIDE              =
+*     I_DEFAULT                = 'X'
+*     I_SAVE                   = ' '
+*     IS_VARIANT               =
+*     IT_EVENTS                =
+*     IT_EVENT_EXIT            =
+*     IS_PRINT                 =
+*     IS_REPREP_ID             =
+*     I_SCREEN_START_COLUMN    = 0
+*     I_SCREEN_START_LINE      = 0
+*     I_SCREEN_END_COLUMN      = 0
+*     I_SCREEN_END_LINE        = 0
+*     I_HTML_HEIGHT_TOP        = 0
+*     I_HTML_HEIGHT_END        = 0
+*     IT_ALV_GRAPHICS          =
+*     IT_HYPERLINK             =
+*     IT_ADD_FIELDCAT          =
+*     IT_EXCEPT_QINFO          =
+*     IR_SALV_FULLSCREEN_ADAPTER        =
+*     O_PREVIOUS_SRAL_HANDLER  =
+*   IMPORTING
+*     E_EXIT_CAUSED_BY_CALLER  =
+*     ES_EXIT_CAUSED_BY_USER   =
+    TABLES
+      t_outtab                 = it_makt
+    EXCEPTIONS
+      program_error            = 1
+      OTHERS                   = 2.
+  IF sy-subrc <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+ENDFORM.
+
+FORM  USER_COMMAND USING r_ucomm LIKE sy-ucomm
+                             rs_selfield TYPE slis_selfield.
+  IF r_ucomm EQ '&IC1' AND rs_selfield-fieldname EQ 'MATNR'.
+    SET PARAMETER ID 'MAT' FIELD rs_selfield-value.
+    CALL TRANSACTION 'MM03'.
+  ENDIF.
+
+ENDFORM.
+FORM zsumer_pf_status USING rt_extab TYPE slis_t_extab.
+  SET PF-STATUS 'STANDARD_FULLSCREEN'.
+ENDFORM.
